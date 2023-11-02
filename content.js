@@ -53,7 +53,7 @@ async function selectRandomOption(selectElement) {
     const rectOk = closeBtn.querySelectorAll('button')[1].getBoundingClientRect();
     const a = rectOk.left + rectOk.width / 2;
     const b = rectOk.top + rectOk.height / 2;
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     click(a,b)
     
   }
@@ -179,8 +179,6 @@ function startInput(){
 }
 
 
-
-
 function enterRinput(inputElement) {
   if (!inputElement) return;
   const input = inputElement.querySelector('input');
@@ -191,6 +189,8 @@ function enterRinput(inputElement) {
     const minDigits = 1;
     const maxDigits = 6;
     const randomValue = generateRandomNumericValue(minDigits, maxDigits);
+    console.log(randomValue)
+    input.focus()
     input.value = randomValue;
   } else if (input.type === 'text') {
     // Generate random text with 10 characters using lorem epsum
@@ -212,13 +212,14 @@ function enterRinput(inputElement) {
 
 function generateRandomNumericValue(minDigits, maxDigits) {
   const digitsBeforeDecimal = minDigits + Math.floor(Math.random() * (maxDigits - minDigits + 1));
-  const digitsAfterDecimal = 2; // Max 2 digits after the decimal point
+  const minDecimalDigits = 3; // Minimum 3 decimal digits
+  const maxDecimalDigits = 5; // Maximum 5 decimal digits
+  const digitsAfterDecimal = minDecimalDigits + Math.floor(Math.random() * (maxDecimalDigits - minDecimalDigits + 1));
   const min = Math.pow(10, digitsBeforeDecimal - 1);
   const max = Math.pow(10, digitsBeforeDecimal) - 1;
   const randomValue = (Math.random() * (max - min) + min).toFixed(digitsAfterDecimal);
   return randomValue;
 }
-
 
 function generateRandomText(length) {
   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -231,9 +232,8 @@ function generateRandomText(length) {
 }
 
 
-
 function fireEventsForInput(inputElement) {
-  ["input", "click", "change", "blur"].forEach(function (eventName) {
+  ["input", "click", "change", "blur","keydown","keyup"].forEach(function (eventName) {
     var event = new Event(eventName, {
       bubbles: true,
       cancelable: true,
@@ -241,5 +241,4 @@ function fireEventsForInput(inputElement) {
     inputElement.dispatchEvent(event);
   });
 }
-
 
