@@ -1,17 +1,18 @@
 let selectElements =[]
+let inputElements = []
 let inProgress = false;
-let url = window.location.href
+let inInput = false;
 // console.log("Content script is running!");
 
 chrome.runtime.sendMessage({ action: "selectRandomOptionsInIonSelect" });
-function selectRandomOption(selectElement) {
-  // console.log("24323423");
-  const options = selectElement.querySelectorAll("ion-select-option");
-  if (options.length > 0) {
-    const randomIndex = Math.floor(Math.random() * options.length);
-    options[randomIndex].selected = true;
-  }
-}
+// function selectRandomOption(selectElement) {
+//   // console.log("24323423");
+//   const options = selectElement.querySelectorAll("ion-select-option");
+//   if (options.length > 0) {
+//     const randomIndex = Math.floor(Math.random() * options.length);
+//     options[randomIndex].selected = true;
+//   }
+// }
 // chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 //   if (message.action === "selectRandomOptionsInIonSelect") {
 //     selectRandomOptionsInIonSelect();
@@ -59,36 +60,41 @@ async function selectRandomOption(selectElement) {
   inProgress=false
   selectElement.classList.add("selected-dsp"); // Mark as processed
   await new Promise((resolve) => setTimeout(resolve, 400));
-    selectElements = document.querySelectorAll("ion-select:not(.selected-dsp)");
-    if(selectElements.length)
-    selectRandomOptionsInIonSelect();
+    selectElements = document.querySelectorAll("ion-select:not(.selected-dsp):not(.has-value)");
+    if(selectElements.length){
+      selectRandomOptionsInIonSelect();
+    }
+    else{
+      startInput()
+    }
 }
+
+
+
 
 
 setTimeout(() =>{
   createButton();
+  // createInputButton()
 },2000)
 
 
 
 let j = 0
-// aria-activedescendant="alert-input-2-0"
 function selectRandomOptionsInIonSelect() {
-
-  while(!inProgress){
-    console.log(j,selectElements[j])
+  while(!inProgress){  
     selectRandomOption(selectElements[j])
-    }
+  }
 }
 
-// selectRandomOptionsInIonSelect();
+
 
 function createButton() {
   const button = document.createElement("button");
-
+  
   // Set the button's inner text
-  button.innerText = "Auto Select";
-
+  button.innerText = "Auto Fill";
+  
   // Apply the specified styles
   button.style.position = "fixed";
   button.style.bottom = "5%";
@@ -109,7 +115,7 @@ function createButton() {
   button.style.fontSize = "16px";
   button.style.userSelect = "none";
   button.style.touchAction = "manipulation";
-
+  
   // Append the button to the document body
   document.body.appendChild(button);
   button.addEventListener("click", function() {
@@ -117,15 +123,123 @@ function createButton() {
   });
 }
 
+// function createInputButton() {
+//   const button = document.createElement("button");
+  
+//   // Set the button's inner text
+//   button.innerText = "Auto Fill Input";
+  
+//   // Apply the specified styles
+//   button.style.position = "fixed";
+//   button.style.bottom = "10%";
+//   button.style.right = "5%";
+//   button.style.zIndex = "999999999";
+//   button.style.backgroundColor = "#c2fbd7";
+//   button.style.borderRadius = "100px";
+//   button.style.boxShadow = "rgba(44, 187, 99, .2) 0 -25px 18px -14px inset, rgba(44, 187, 99, .15) 0 1px 2px, rgba(44, 187, 99, .15) 0 2px 4px, rgba(44, 187, 99, .15) 0 4px 8px, rgba(44, 187, 99, .15) 0 8px 16px, rgba(44, 187, 99, .15) 0 16px 32px";
+//   button.style.color = "green";
+//   button.style.cursor = "pointer";
+//   button.style.display = "inline-block";
+//   button.style.fontFamily = "CerebriSans-Regular, -apple-system, system-ui, Roboto, sans-serif";
+//   button.style.padding = "7px 20px";
+//   button.style.textAlign = "center";
+//   button.style.textDecoration = "none";
+//   button.style.transition = "all 250ms";
+//   button.style.border = "0";
+//   button.style.fontSize = "16px";
+//   button.style.userSelect = "none";
+//   button.style.touchAction = "manipulation";
+  
+//   // Append the button to the document body
+//   document.body.appendChild(button);
+//   button.addEventListener("click", function() {
+//     startInput();
+//   });
+// }
+
 function startProcess() {
-  clearFunction()
-  selectElements = document.querySelectorAll("ion-select");
-  // inProgress=false
-  selectRandomOptionsInIonSelect()
+  selectElements = document.querySelectorAll("ion-select:not(.selected-dsp):not(.has-value)");
+  
+  if(selectElements.length>0){
+    console.log("this is")
+    selectRandomOptionsInIonSelect()
+  }
+  else{
+    startInput()
+  }
+}
+
+function startInput(){
+  inputElements = document.querySelectorAll("ion-input:not(.selected-dsp):not(.has-value)");
+  
+  if(inputElements){
+    // enterRandomInputInIonInput()
+    enterRinput(inputElements[0]);
+  }
 }
 
 
-function clearFunction(){
-  selectElements = []
-  return selectElements
+
+
+function enterRinput(inputElement) {
+  if (!inputElement) return;
+  const input = inputElement.querySelector('input');
+
+  // Check input type
+  if (input.type === 'number' || input.type === 'float') {
+    // Generate a random numeric value with a minimum of 1 digit before decimal and max 6 digits
+    const minDigits = 1;
+    const maxDigits = 6;
+    const randomValue = generateRandomNumericValue(minDigits, maxDigits);
+    input.value = randomValue;
+  } else if (input.type === 'text') {
+    // Generate random text with 10 characters using lorem epsum
+    const randomText = generateRandomText(10);
+    input.value = randomText;
+  }
+
+  fireEventsForInput(input);
+
+  inputElement.classList.add("selected-dsp"); // Mark as processed
+  inputElements = document.querySelectorAll("ion-input:not(.selected-dsp):not(.has-value)");
+
+  if (inputElements.length) {
+    enterRinput(inputElements[0]);
+  } else {
+    console.log('No Input elements');
+  }
 }
+
+function generateRandomNumericValue(minDigits, maxDigits) {
+  const digitsBeforeDecimal = minDigits + Math.floor(Math.random() * (maxDigits - minDigits + 1));
+  const digitsAfterDecimal = 2; // Max 2 digits after the decimal point
+  const min = Math.pow(10, digitsBeforeDecimal - 1);
+  const max = Math.pow(10, digitsBeforeDecimal) - 1;
+  const randomValue = (Math.random() * (max - min) + min).toFixed(digitsAfterDecimal);
+  return randomValue;
+}
+
+
+function generateRandomText(length) {
+  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters.charAt(randomIndex);
+  }
+  return result;
+}
+
+
+
+function fireEventsForInput(inputElement) {
+  ["input", "click", "change", "blur"].forEach(function (eventName) {
+    var event = new Event(eventName, {
+      bubbles: true,
+      cancelable: true,
+    });
+    inputElement.dispatchEvent(event);
+  });
+}
+
+
