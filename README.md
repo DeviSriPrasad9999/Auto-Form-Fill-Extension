@@ -1,2 +1,2 @@
 # Auto-Form-Fill-Extension
-This extension can be used to auto select all the select fields in Ionic Applications. Just need to upload it to the chrome. 
+This extension can be used to Auto Fill all the form fields in Ionic Applications. Just need to upload it to the chrome extensions by turning on developer mode. 
